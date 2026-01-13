@@ -14,8 +14,19 @@ func main() {
 	app := &cli.Command{
 		Name:  "hexlet-path-size",
 		Usage: "print size of a file or directory",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "human",
+				Usage:   "human-readable sizes (auto-select unit)",
+				Aliases: []string{"H"},
+			},
+		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			result, err := ps.GetPathSize(cmd.Args().Get(0), false, false, false)
+			if cmd.NArg() == 0 {
+				return fmt.Errorf("path argument is required")
+			}
+			path := cmd.Args().First()
+			result, err := ps.GetPathSize(path, false, cmd.Bool("human"), false)
 			if err != nil {
 				return err
 			}
