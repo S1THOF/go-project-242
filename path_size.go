@@ -7,57 +7,56 @@ import (
 	"strings"
 )
 
-func calcSize(path string, recursive, human, all bool) (int64, error) {
+func calcSize(path string, recursive, all bool) (int64, error) {
 	fileinfo, err := os.Lstat(path)
 	if err != nil {
 		return 0, err
 	}
+
 	if !fileinfo.IsDir() {
-		if shouldInclude(fileinfo.Name(), all) && fileinfo.Mode().IsRegular() {
+		if fileinfo.Mode().IsRegular() {
 			return fileinfo.Size(), nil
 		}
+		return 0, nil
 	}
 
-	entryes, err := os.ReadDir(path)
+	// Это директория
+	entries, err := os.ReadDir(path)
 	if err != nil {
 		return 0, err
 	}
 
 	var total int64
-	for _, entry := range entryes {
-		if shouldInclude(entry.Name(), all) {
-			info, err := entry.Info()
-			if err != nil {
-				return 0, nil
-			}
-			size := info.Size()
-			total += size
+	for _, entry := range entries {
+		if !shouldInclude(entry.Name(), all) {
+			continue
 		}
 
-		fullPath := filepath.Join(path, entry.Name())
-
-		if recursive && entry.IsDir() {
-			size, err := calcSize(fullPath, recursive, human, all)
+		if entry.IsDir() {
+			if recursive {
+				fullPath := filepath.Join(path, entry.Name())
+				size, err := calcSize(fullPath, recursive, all)
+				if err != nil {
+					return 0, err
+				}
+				total += size
+			}
+		} else {
+			// Обычный файл
+			info, err := entry.Info()
 			if err != nil {
 				return 0, err
 			}
-			total += size
-		} else if entry.IsDir() {
-			fileinfo, err := entry.Info()
-			if err != nil {
-				return 0, err
-			}
-			if fileinfo.Mode().IsRegular() {
-				total += fileinfo.Size()
+			if info.Mode().IsRegular() {
+				total += info.Size()
 			}
 		}
 	}
-
 	return total, nil
 }
 
 func GetPathSize(path string, recursive, human, all bool) (string, error) {
-	size, err := calcSize(path, recursive, human, all)
+	size, err := calcSize(path, recursive, all)
 	if err != nil {
 		return "", err
 	}
