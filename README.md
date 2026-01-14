@@ -1,7 +1,7 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/S1THOF/go-project-242/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/S1THOF/go-project-242/actions)
 
-# hexlet-path-size
+# Analize-path-size
 
 A simple CLI tool to display the size of files and directories in bytes or human-readable format.
 
