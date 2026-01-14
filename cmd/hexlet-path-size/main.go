@@ -17,18 +17,18 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "human",
-				Usage:   "human-readable sizes (auto-select unit) (default: false)",
 				Aliases: []string{"H"},
-			},
-			&cli.BoolFlag{
-				Name:    "all",
-				Usage:   "include hidden files and directories (default: false)",
-				Aliases: []string{"a"},
+				Usage:   "human-readable sizes (auto-select unit)",
 			},
 			&cli.BoolFlag{
 				Name:    "recursive",
-				Usage:   "recursive size of directories (default: false)",
 				Aliases: []string{"r"},
+				Usage:   "recursive size of directories",
+			},
+			&cli.BoolFlag{
+				Name:    "all",
+				Aliases: []string{"a"},
+				Usage:   "include hidden files and directories",
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -36,11 +36,14 @@ func main() {
 				return fmt.Errorf("path argument is required")
 			}
 			path := cmd.Args().First()
+
 			result, err := ps.GetPathSize(path, cmd.Bool("recursive"), cmd.Bool("human"), cmd.Bool("all"))
 			if err != nil {
 				return err
 			}
-			fmt.Println(result)
+
+			// Output format: <size><tab><path>
+			fmt.Printf("%s\t%s\n", result, path)
 			return nil
 		},
 	}

@@ -7,6 +7,17 @@ import (
 	"strings"
 )
 
+func GetPathSize(path string, recursive, human, all bool) (string, error) {
+	size, err := calcSize(path, recursive, all)
+	if err != nil {
+		return "", err
+	}
+	if human {
+		return FormatSize(float64(size)), nil
+	}
+	return fmt.Sprintf("%dB", size), nil
+}
+
 func calcSize(path string, recursive, all bool) (int64, error) {
 	fileinfo, err := os.Lstat(path)
 	if err != nil {
@@ -20,7 +31,6 @@ func calcSize(path string, recursive, all bool) (int64, error) {
 		return 0, nil
 	}
 
-	// Это директория
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return 0, err
@@ -42,7 +52,6 @@ func calcSize(path string, recursive, all bool) (int64, error) {
 				total += size
 			}
 		} else {
-			// Обычный файл
 			info, err := entry.Info()
 			if err != nil {
 				return 0, err
@@ -55,19 +64,8 @@ func calcSize(path string, recursive, all bool) (int64, error) {
 	return total, nil
 }
 
-func GetPathSize(path string, recursive, human, all bool) (string, error) {
-	size, err := calcSize(path, recursive, all)
-	if err != nil {
-		return "", err
-	}
-
-	var result string
-	if human {
-		result = fmt.Sprintf("%s\t%s", FormatSize(float64(size)), path)
-	} else {
-		result = fmt.Sprintf("%vB\t%s", size, path)
-	}
-	return result, nil
+func shouldInclude(name string, all bool) bool {
+	return all || !strings.HasPrefix(name, ".")
 }
 
 func FormatSize(size float64) string {
@@ -83,8 +81,4 @@ func FormatSize(size float64) string {
 		return fmt.Sprintf("%.0fB", size)
 	}
 	return fmt.Sprintf("%.1f%s", size, units[unitIndex])
-}
-
-func shouldInclude(name string, all bool) bool {
-	return all || !strings.HasPrefix(name, ".")
 }
