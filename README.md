@@ -10,7 +10,7 @@ A simple CLI tool to display the size of files and directories in bytes or human
 
 ```bash
 git clone https://github.com/S1THOF/Analize-path-size.git
-cd go-project-242
+cd Analize-path-size
 make build
 ```
 
